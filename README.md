@@ -1,9 +1,17 @@
 # Emanon-GO (the Totoro bot)
 
+[![Discord](https://img.shields.io/discord/898363402467045416?color=5865f2&label=discord)](https://discord.gg/NNJ5RgVBC5)
+
 Emanon-GO (the Totoro bot) is a lightweight Discord bot written in Go that provides AniList-based
 searching (anime/manga) and forum thread tagging helpers for communities using
 Discord Forums. It is a Go port of the original Emanon Python bot with
 improvements to embed styling and Docker support.
+
+<p align="center">
+	<img src="https://user-images.githubusercontent.com/61558546/179259314-6b71a9c7-ed1e-4ef2-95d3-11ec512f2180.png" alt="Emanon embed preview" style="max-width:100%;height:auto;" />
+	<br/>
+	<em>Example embed produced by Emanon-GO</em>
+</p>
 
 ## Features
 - Auto-search AniList when users post wrapped names (e.g., `My Favorite Manga` or <My Manga>)
@@ -11,17 +19,6 @@ improvements to embed styling and Docker support.
 - Stylized cover image using AniList media artwork
 - Forum thread commands for staff to apply standard tags and prefixes (.solved, .duplicate, etc.)
 - Config-driven: enable/disable search, restrict channels, and set allowed moderator roles
-
-## Quick links
-- Example config: `example_config.yaml`
-
-[![Discord](https://img.shields.io/discord/898363402467045416?color=5865f2&label=discord)](https://discord.gg/NNJ5RgVBC5)
-
-<p align="center">
-	<img src="https://user-images.githubusercontent.com/61558546/179259314-6b71a9c7-ed1e-4ef2-95d3-11ec512f2180.png" alt="Emanon embed preview" style="max-width:100%;height:auto;" />
-	<br/>
-	<em>Example embed produced by Emanon-GO</em>
-</p>
 
 ## Requirements
 - Go 1.20+ (for manual build)
@@ -112,4 +109,4 @@ The bot will only allow staff to run thread commands. Permissions are configurab
 - If forum tag changes fail, check the bot's Manage Threads/Manage Channels permissions and that the forum has the expected tag names.
 
 ## License
-- This project follows the existing LICENSE in the repository.
+This project follows the existing LICENSE in the repository.
