@@ -1,4 +1,4 @@
-module github.com/galpt/go-kotatsu-bot
+module github.com/KotatsuApp/Emanon-GO
 
 go 1.20
 
