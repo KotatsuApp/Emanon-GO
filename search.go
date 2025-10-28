@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -154,15 +155,55 @@ func (m *aniListMedia) toEmbed() *discordgo.MessageEmbed {
 	if len(desc) > 800 {
 		desc = desc[:800] + "..."
 	}
+	// Determine color: prefer AniList cover color if available
+	color := 0x2f3136
+	if m.ColorHex != "" {
+		ch := strings.TrimPrefix(m.ColorHex, "#")
+		if v, err := strconv.ParseInt(ch, 16, 32); err == nil {
+			color = int(v)
+		}
+	}
+
 	embed := &discordgo.MessageEmbed{
 		Title:       m.Title,
 		Description: fmt.Sprintf("***%s***\n%s", strings.Join(m.Genres, ", "), desc),
 		URL:         m.SiteURL,
-		Color:       0x2f3136,
+		Color:       color,
 	}
 	if m.CoverURL != "" {
 		embed.Image = &discordgo.MessageEmbedImage{URL: m.CoverURL}
 	}
+
+	// Footer: follow Python implementation behaviour — use format after last dot,
+	// replace "TV" with "ANIME" and capitalize. Include AniList logo.
+	footer := m.Format
+	if idx := strings.LastIndex(footer, "."); idx != -1 && idx+1 < len(footer) {
+		footer = footer[idx+1:]
+	}
+	footer = strings.ReplaceAll(footer, "TV", "ANIME")
+	if footer != "" {
+		footer = strings.ToLower(footer)
+		if len(footer) > 0 {
+			footer = strings.ToUpper(footer[:1]) + footer[1:]
+		}
+		embed.Footer = &discordgo.MessageEmbedFooter{Text: footer, IconURL: "https://anilist.co/img/logo_al.png"}
+	}
+
+	// Instead of setting embed.Timestamp (which forces Discord to display a clock/time),
+	// append a date-only string to the footer so the client shows only the date.
+	if m.StartDate != "" {
+		if t, err := time.Parse("2006-01-02", m.StartDate); err == nil {
+			// Use long, unambiguous date format (e.g. "October 28, 2025") to avoid
+			// locale confusion between month/day order.
+			dateStr := t.Format("January 2, 2006") // e.g. October 28, 1999
+			if embed.Footer == nil {
+				embed.Footer = &discordgo.MessageEmbedFooter{Text: dateStr, IconURL: "https://anilist.co/img/logo_al.png"}
+			} else {
+				embed.Footer.Text = fmt.Sprintf("%s • %s", embed.Footer.Text, dateStr)
+			}
+		}
+	}
+
 	return embed
 }
 
