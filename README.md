@@ -14,7 +14,7 @@ improvements to embed styling and Docker support.
 </p>
 
 ## Features
-- Auto-search AniList when users post wrapped names (e.g., `My Favorite Manga` or <My Manga>)
+- Auto-search AniList when users post wrapped names (e.g., `My Favorite Manga` or `<My Manga>`)
 - Pretty Discord embed with genres, shortened description and "(more)" link
 - Stylized cover image using AniList media artwork
 - Forum thread commands for staff to apply standard tags and prefixes (.solved, .duplicate, etc.)
