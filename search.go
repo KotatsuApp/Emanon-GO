@@ -151,10 +151,53 @@ type aniListMedia struct {
 }
 
 func (m *aniListMedia) toEmbed() *discordgo.MessageEmbed {
-	desc := m.Desc
-	if len(desc) > 800 {
-		desc = desc[:800] + "..."
+	// Build description similar to the Python implementation:
+	// - start with genres as bold/italic prefix
+	// - perform simple replacements for <i> and <br>
+	// - strip remaining tags
+	// - shorten to ~256 characters and append "... [(more)](url)" when truncated
+	// Deduplicate genres (preserve order) to avoid repeated labels in embeds
+	var uniqGenres []string
+	seen := make(map[string]bool)
+	for _, g := range m.Genres {
+		g = strings.TrimSpace(g)
+		if g == "" {
+			continue
+		}
+		if !seen[g] {
+			seen[g] = true
+			uniqGenres = append(uniqGenres, g)
+		}
 	}
+	prefix := ""
+	if len(uniqGenres) > 0 {
+		prefix = fmt.Sprintf("***%s***\n", strings.Join(uniqGenres, ", "))
+	}
+	body := ""
+	if strings.TrimSpace(m.Desc) != "" {
+		raw := m.Desc
+		// remove <i> tags and convert <br> to newlines (case-insensitive)
+		raw = reI.ReplaceAllString(raw, "")
+		raw = reBr.ReplaceAllString(raw, "\n")
+		// strip any remaining HTML
+		raw = stripTags(raw)
+		// shorten to fit roughly 256 chars total like Python; reserve space for prefix
+		maxBody := 256 - len(prefix)
+		if maxBody < 0 {
+			maxBody = 0
+		}
+		if len(raw) > maxBody {
+			truncated := raw[:maxBody]
+			truncated = strings.TrimRight(truncated, " \n")
+			body = truncated + "... [(more)](" + m.SiteURL + ")"
+		} else {
+			body = raw
+		}
+	}
+
+	// Fallback: if no description, show just genres + empty body
+	desc := prefix + body
+
 	// Determine color: prefer AniList cover color if available
 	color := 0x2f3136
 	if m.ColorHex != "" {
@@ -166,7 +209,7 @@ func (m *aniListMedia) toEmbed() *discordgo.MessageEmbed {
 
 	embed := &discordgo.MessageEmbed{
 		Title:       m.Title,
-		Description: fmt.Sprintf("***%s***\n%s", strings.Join(m.Genres, ", "), desc),
+		Description: desc,
 		URL:         m.SiteURL,
 		Color:       color,
 	}
@@ -300,10 +343,12 @@ func searchAniList(name, mediaType string, allowAdult bool) (*aniListMedia, erro
 	if title == "" {
 		title = m.Title.Native
 	}
-	// strip simple HTML from description
-	desc := stripTags(m.Description)
+	// keep raw HTML description; formatting/replacements are done in toEmbed
+	desc := m.Description
 
-	cover := m.CoverImage.Large
+	// Use AniList's media endpoint to get the stylized media image used by the
+	// Python implementation: https://img.anili.st/media/{id}
+	cover := fmt.Sprintf("https://img.anili.st/media/%d", m.ID)
 	color := m.CoverImage.Color
 	startDate := ""
 	if m.StartDate.Year != 0 {
@@ -322,6 +367,8 @@ func searchAniList(name, mediaType string, allowAdult bool) (*aniListMedia, erro
 	}, nil
 }
 
+var reI = regexp.MustCompile(`(?i)</?i/?>`)
+var reBr = regexp.MustCompile(`(?i)</?br/?>`)
 var tagRe = regexp.MustCompile(`<[^>]*>`)
 
 func stripTags(s string) string {
