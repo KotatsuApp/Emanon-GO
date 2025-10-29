@@ -30,28 +30,27 @@ improvements to embed styling and Docker support.
 
 1. Clone the repository:
 
-```powershell
-git clone https://github.com/KotatsuApp/Emanon-GO.git
-cd Emanon-GO
+```sh
+git clone https://github.com/KotatsuApp/Emanon-GO.git && cd Emanon-GO
 ```
 
 2. Build the binary:
 
-```powershell
+```sh
 go build -o emanon-go
 ```
 
-3. Create a `config.yaml` from `example_config.yaml` and fill in your Discord bot token and other options.
+3. Open `config.yaml` and fill in your Discord bot token and other options.
 
 4. Run the bot:
 
-```powershell
-.\emanon-go
+```sh
+./emanon-go
 ```
 
 ### Docker
 
-Build the image (need `config.yaml` file):
+Build the image:
 
 ```powershell
 docker build -t emanon-go:latest .
