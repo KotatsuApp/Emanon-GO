@@ -51,16 +51,16 @@ go build -o emanon-go
 
 ### Docker
 
-Build the image:
+Build the image (need `config.yaml` file):
 
 ```powershell
 docker build -t emanon-go:latest .
 ```
 
-Run the container (mount `config.yaml`):
+Run the container:
 
 ```powershell
-docker run -v C:\path\to\config.yaml:/app/config.yaml --env DISCORD_TOKEN="YOUR_TOKEN" --name emanon-go emanon-go:latest
+docker run --name emanon-go emanon-go:latest
 ```
 
 Notes:
